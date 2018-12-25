@@ -137,6 +137,50 @@ namespace ExpatriatePostingLinksV1
                 return dtmPosted;
             }
         }
+        
+        public bool AddPosting(out int postingID)
+            {
+                postingID=-1;
+                try
+                {
+                    if (PostingDate != DateTime.MinValue && RawHTML != string.Empty)
+                    {
+                        var _sqlconn = new SqlConnection(cMain.GetConnectionString());
+                        var _sqlcmd = new SqlCommand();
+                        _sqlcmd.Connection = _sqlconn;
+                        string _commandtext = "insert into tblPosting " +
+                                             "(dtmPosting, sPostingHTML,iExpatPostingID,sPostingURL,sPostingDesc,fPrice,sCatID,sRegion,sSubRegion)" +
+                                             "values (@dtmPosting,@sPostingHTML,@iExpatPostingID,@sPostingURL,@sPostingDesc,@fPrice,@sCatID,@sRegion,@sSubRegion)";
+                        _sqlcmd.CommandText = _commandtext;
+                        _sqlcmd.Parameters.AddWithValue("@dtmPosting", PostingDate);
+                        _sqlcmd.Parameters.AddWithValue("@sPostingHTML", RawHTML); 
+                        _sqlcmd.Parameters.AddWithValue("@iExpatPostingID", iExpatPostingID);
+                        _sqlcmd.Parameters.AddWithValue("@sPostingURL", sURL);
+                        _sqlcmd.Parameters.AddWithValue("@sPostingDesc", sPostingDesc);
+                        _sqlcmd.Parameters.AddWithValue("@fPrice", fPrice);
+                        _sqlcmd.Parameters.AddWithValue("@sCatID", sCategory);
+                        _sqlcmd.Parameters.AddWithValue("@sRegion", sRegion);
+                        _sqlcmd.Parameters.AddWithValue("@sSubRegion", sSubRegion);
+
+                        _sqlconn.Open();
+                        _sqlcmd.ExecuteNonQuery();
+                        _sqlcmd.Parameters.Clear();
+                        _sqlcmd.CommandText = "SELECT @@IDENTITY";
+                        postingID = Convert.ToInt32(_sqlcmd.ExecuteScalar());
+                        _sqlcmd.Dispose();
+                        _sqlcmd = null;
+                        _sqlconn.Close();
+                        _sqlconn.Dispose();
+                        _sqlconn = null;
+                        return true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+                catch{return false;}
+            }
 
         public bool UpdatePosting(int postingID)
         {
@@ -178,6 +222,7 @@ namespace ExpatriatePostingLinksV1
             }
             catch { return false; }
         }
+
         public static void AddRawHTMLPosting(out int iPostingID, DateTime dtmPosting, string sPostingHTML)
         {
             iPostingID = -1;
@@ -210,6 +255,7 @@ namespace ExpatriatePostingLinksV1
             catch { return; }
 
         }
+
         public static DataTable GetAllRawHTMLPosting()
         {
             try
