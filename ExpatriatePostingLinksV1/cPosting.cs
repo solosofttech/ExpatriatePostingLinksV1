@@ -53,20 +53,30 @@ namespace ExpatriatePostingLinksV1
                 if (bPostingDesc == false)
                 {
                     sPostingDesc = node.ParentNode.InnerText;
-
+                    string[] saDesc = { "" };
                     if (sPostingDesc.ToLower().Contains("bhd") && sPostingDesc.ToLower().Contains("/"))
                     {
-                        string[] saDesc = sPostingDesc.Split("/".ToCharArray());
-                        foreach (string desc in saDesc)
+                        saDesc = sPostingDesc.Split("/".ToCharArray());
+                    }
+                    else if (sPostingDesc.ToLower().Contains("bhd") && sPostingDesc.ToLower().Contains(","))
+                    {
+                        saDesc = sPostingDesc.Split(",".ToCharArray());
+                    }
+                    else if (sPostingDesc.ToLower().Contains("bhd") && sPostingDesc.ToLower().Contains("-"))
+                    {
+                        saDesc = sPostingDesc.Split("-".ToCharArray());
+                    }
+
+                    foreach (string desc in saDesc)
+                    {
+                        if (desc.ToLower().Contains("bhd"))
                         {
-                            if (desc.Contains("BHD"))
-                            {
-                                string sPrice = desc.Replace("BHD", "");
-                                sPrice = sPrice.Trim();
-                                float.TryParse(sPrice, out fPrice);
-                            }
+                            string sPrice = desc.ToLower().Replace("bhd", "");
+                            sPrice = sPrice.Trim();
+                            float.TryParse(sPrice, out fPrice);
                         }
                     }
+                    
                     bPostingDesc = true;
                 }
 
@@ -135,6 +145,31 @@ namespace ExpatriatePostingLinksV1
                 if (DateTime.TryParse(sRawDate, culture, styles, out dtmPosted) == false)
                     dtmPosted = DateTime.MinValue;
                 return dtmPosted;
+            }
+        }
+
+        public bool CheckExistsPosting(out int postingID, int expatPostingID)
+        {
+            postingID = -1;
+            try
+            {
+                var _sqlconn = new SqlConnection(cMain.GetConnectionString());
+                //string _commandText = "Select * from tblPosting WHERE iExpatPostingID is null";
+                string _commandText = "Select * from tblPosting where iExpatPostingID = " + expatPostingID.ToString();
+                var _sqlda = new SqlDataAdapter(_commandText, _sqlconn);
+                var _datatable = new DataTable();
+                _sqlda.Fill(_datatable);
+                if(_datatable.Rows.Count>0)
+                {
+                    int.TryParse(_datatable.Rows[0]["iExpatPostingID"].ToString(), out postingID);
+                    return true;
+                }
+                return false;
+                
+            }
+            catch
+            {
+                return false;
             }
         }
         
@@ -262,7 +297,7 @@ namespace ExpatriatePostingLinksV1
             {
                 var _sqlconn = new SqlConnection(cMain.GetConnectionString());
                 //string _commandText = "Select * from tblPosting WHERE iExpatPostingID is null";
-                string _commandText = "Select * from tblPosting";
+                string _commandText = "Select * from tblPosting where fPrice = 0";
                 var _sqlda = new SqlDataAdapter(_commandText, _sqlconn);
                 var _datatable = new DataTable();
                 _sqlda.Fill(_datatable);

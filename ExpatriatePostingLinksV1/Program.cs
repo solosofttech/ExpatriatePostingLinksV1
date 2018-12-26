@@ -133,6 +133,7 @@ namespace ExpatriatePostingLinksV1
             }
 
             Console.WriteLine("Total Rows: " + iRowsCount.ToString() + " : Total Updated Rows" + iCount.ToString());
+            Console.ReadLine();
         }
     }
 
