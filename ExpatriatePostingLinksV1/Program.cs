@@ -21,8 +21,9 @@ namespace ExpatriatePostingLinksV1
     {
         static void Main(string[] args)
         {
-            //ScrapPostingFromPages();
-            UpdatePostingTable();
+            //ScrapCatLinkPagination();
+            ScrapPostingFromPages();
+            //UpdatePostingTable();
         }
 
         static void ScrapCatLinkPagination()
@@ -102,9 +103,13 @@ namespace ExpatriatePostingLinksV1
                                     if (posting.PostingDate != DateTime.MinValue && posting.RawHTML != string.Empty)
                                     {
                                         int iPostingID = -1;
-                                        cPosting.AddRawHTMLPosting(out iPostingID, DateTime.Now, posting.RawHTML);
+                                        //cPosting.AddRawHTMLPosting(out iPostingID, DateTime.Now, posting.RawHTML);
+                                        cPosting objPosting = new cPosting(posting.RawHTML,posting.RawDate);                                        
+                                        objPosting.AddPosting(out iPostingID);
                                         if (iPostingID > 0)
-                                            iPostingCount = iPostingCount + 1;
+                                        {
+                                            iPostingCount = iPostingCount + 1;                                            
+                                        }
                                     }
                                 }
                             }
@@ -116,6 +121,8 @@ namespace ExpatriatePostingLinksV1
                     }
                 }
             }
+
+            Console.ReadLine();
         }
 
         static void UpdatePostingTable()

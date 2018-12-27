@@ -61,6 +61,7 @@
     <Compile Include="cMainCategory.cs" />
     <Compile Include="cPages.cs" />
     <Compile Include="cPosting.cs" />
+    <Compile Include="cVehicle.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
