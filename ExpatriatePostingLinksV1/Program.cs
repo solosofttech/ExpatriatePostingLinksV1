@@ -21,7 +21,7 @@ namespace ExpatriatePostingLinksV1
     {
         static void Main(string[] args)
         {
-            //ScrapCatLinkPagination();
+            ScrapCatLinkPagination();
             ScrapPostingFromPages();
             //UpdatePostingTable();
         }
@@ -65,7 +65,7 @@ namespace ExpatriatePostingLinksV1
                 }
             }
 
-            Console.ReadLine();
+            //Console.ReadLine();
         }
 
         static void ScrapPostingFromPages()
@@ -122,7 +122,7 @@ namespace ExpatriatePostingLinksV1
                 }
             }
 
-            Console.ReadLine();
+            //Console.ReadLine();
         }
 
         static void UpdatePostingTable()

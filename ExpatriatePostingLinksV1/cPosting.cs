@@ -239,7 +239,7 @@ namespace ExpatriatePostingLinksV1
                         }
                         else
                         {
-                            if (postingID > 0) { UpdatePosting(postingID); return true; }
+                            //if (postingID > 0) { UpdatePosting(postingID); return true; }
                         }
                     }
 
