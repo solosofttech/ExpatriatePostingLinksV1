@@ -12,6 +12,8 @@ using System.Data.SqlClient;
 using System.Data.SqlTypes;
 using NScrape.Forms;
 using System.Globalization;
+using ScrapySharp;
+using ScrapySharp.Network;
 
 
 
@@ -21,9 +23,38 @@ namespace ExpatriatePostingLinksV1
     {
         static void Main(string[] args)
         {
-            ScrapCatLinkPagination();
-            ScrapPostingFromPages();
+            //ScrapCatLinkPagination();
+            //ScrapPostingFromPages();
             //UpdatePostingTable();
+            ScrapIndividualPages();
+        }
+
+        static void ScrapIndividualPages()
+        {
+            try
+            {
+                ScrapingBrowser oBrowser = new ScrapingBrowser();
+                oBrowser.AllowAutoRedirect = true;
+                oBrowser.AllowMetaRedirect = true;               
+                WebPage oPageResult = oBrowser.NavigateToPage(new Uri("https://www.expatriates.com/cls/41052337.html"));
+
+                // Get Page View Count
+                string sPageViewCount = string.Empty;
+                var nodePageViewCount = oPageResult.Html.SelectSingleNode("//*[@class='pageviewcount']");
+                if (nodePageViewCount != null)
+                {
+                    //sPageViewCount = nodePageViewCount.InnerText.Trim();
+                    Console.WriteLine(nodePageViewCount.Name + " : " + nodePageViewCount.OuterHtml + " : " + nodePageViewCount.InnerText);
+
+                    foreach (HtmlNode node in nodePageViewCount.ChildNodes)
+                    {
+                        Console.WriteLine(node.Name + " : " + node.OuterHtml + " : " + node.InnerText);
+                    }
+                }
+
+                Console.ReadLine();
+            }
+            catch (Exception oEx) { Console.WriteLine("Error:" + oEx.Message); }
         }
 
         static void ScrapCatLinkPagination()
