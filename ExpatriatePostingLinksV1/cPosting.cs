@@ -10,15 +10,15 @@ using HtmlAgilityPack;
 
 namespace ExpatriatePostingLinksV1
 {
+    enum eVehicleTransmissionType
+    {
+        None = 0,
+        Automatic = 1,
+        Manual = 2
+    }
+
     class cPosting
     {
-        enum eVehicleTransmissionType
-        {
-            None = 0,
-            Automatic = 1,
-            Manual = 2
-        }
-
         protected string sRawHTML = string.Empty;
         protected string sRawDate = string.Empty;
         protected string sURL = string.Empty;
@@ -208,7 +208,7 @@ namespace ExpatriatePostingLinksV1
                                                  "sCarModel,iCarTransmission,dCarKM,iCarYear)" +
                                                  "values (@dtmPosting,@sPostingHTML,@iExpatPostingID,@sPostingURL," +
                                                  "@sPostingDesc,@fPrice,@sCatID,@sRegion,@sSubRegion," +
-                                                 "@sCarMake,@sCarModel,@iCarTransmission,@dCarKM,@iCarYear)";
+                                                 "@sMake,@sModel,@iCarTransmission,@dCarKM,@iCarYear,@bHasPicture)";
                             _sqlcmd.CommandText = _commandtext;
                             _sqlcmd.Parameters.AddWithValue("@dtmPosting", PostingDate);
                             _sqlcmd.Parameters.AddWithValue("@sPostingHTML", RawHTML);
@@ -219,13 +219,14 @@ namespace ExpatriatePostingLinksV1
                             _sqlcmd.Parameters.AddWithValue("@sCatID", sCategory);
                             _sqlcmd.Parameters.AddWithValue("@sRegion", sRegion);
                             _sqlcmd.Parameters.AddWithValue("@sSubRegion", sSubRegion);
-                            _sqlcmd.Parameters.AddWithValue("@sCarMake", sMake);
-                            _sqlcmd.Parameters.AddWithValue("@sCarModel", sModel);
+                            _sqlcmd.Parameters.AddWithValue("@sMake", sMake);
+                            _sqlcmd.Parameters.AddWithValue("@sModel", sModel);
                             _sqlcmd.Parameters.AddWithValue("@iCarTransmission", (int)eTransmission);
                             _sqlcmd.Parameters.AddWithValue("@dCarKM", dKM);
                             _sqlcmd.Parameters.AddWithValue("@iCarYear", iYear);
+                            _sqlcmd.Parameters.AddWithValue("@bHasPicture", bPicture);
 
-                            _sqlconn.Open();
+                        _sqlconn.Open();
                             _sqlcmd.ExecuteNonQuery();
                             _sqlcmd.Parameters.Clear();
                             _sqlcmd.CommandText = "SELECT @@IDENTITY";
@@ -259,8 +260,8 @@ namespace ExpatriatePostingLinksV1
                 string _commandtext = "UPDATE tblPosting " +
                                      "SET iExpatPostingID = @iExpatPostingID, sPostingURL= @sPostingURL, dtmPosting=@dtmPosting, "+
                                      "sPostingDesc=@sPostingDesc, fPrice=@fPrice, SCatID = @sCatID, " +
-                                     "sRegion = @sRegion, sSubRegion = @sSubRegion, sCarMake= @sCarMake, " +
-                                     "sCarModel=@sCarModel, iCarTransmission=@iCarTransmission, dCarKM=@dCarKM, iCarYear=@iCarYear " +
+                                     "sRegion = @sRegion, sSubRegion = @sSubRegion, sMake= @sMake, " +
+                                     "sModel=@sModel, iCarTransmission=@iCarTransmission, dCarKM=@dCarKM, iCarYear=@iCarYear, bHasPicture=@bHasPicture " +
                                      "WHERE iPostingID =" + postingID.ToString();
                 _sqlcmd.CommandText = _commandtext;
                 _sqlcmd.Parameters.AddWithValue("@iExpatPostingID", iExpatPostingID);
@@ -271,11 +272,12 @@ namespace ExpatriatePostingLinksV1
                 _sqlcmd.Parameters.AddWithValue("@SCatID", sCategory);
                 _sqlcmd.Parameters.AddWithValue("@sRegion", sRegion);
                 _sqlcmd.Parameters.AddWithValue("@sSubRegion", sSubRegion);
-                _sqlcmd.Parameters.AddWithValue("@sCarMake", sMake);
-                _sqlcmd.Parameters.AddWithValue("@sCarModel", sModel);
+                _sqlcmd.Parameters.AddWithValue("@sMake", sMake);
+                _sqlcmd.Parameters.AddWithValue("@sModel", sModel);
                 _sqlcmd.Parameters.AddWithValue("@iCarTransmission", (int)eTransmission);
                 _sqlcmd.Parameters.AddWithValue("@dCarKM", dKM);
                 _sqlcmd.Parameters.AddWithValue("@iCarYear", iYear);
+                _sqlcmd.Parameters.AddWithValue("@bHasPicture", bPicture);
 
 
                 _sqlconn.Open();
@@ -414,6 +416,85 @@ namespace ExpatriatePostingLinksV1
                 }
             }
 
+        }
+
+        public static DataRow GetPostingByExpatID(int expatPostingID)
+        {
+            DataRow datarow = null;
+            try
+            {
+                var _sqlconn = new SqlConnection(cMain.GetConnectionString());
+                //string _commandText = "Select * from tblPosting WHERE iExpatPostingID is null";
+                string _commandText = "Select * from tblPosting where iExpatPostingID = " + expatPostingID.ToString();
+                var _sqlda = new SqlDataAdapter(_commandText, _sqlconn);
+                var _datatable = new DataTable();
+                _sqlda.Fill(_datatable);
+                if (_datatable.Rows.Count > 0)
+                {
+                    datarow = _datatable.Rows[0];                    
+                }
+                
+                return datarow;
+            }
+            catch { return null; }
+        }
+
+        public static DataRow GetPostingByID(int postingID)
+        {
+            DataRow datarow = null;
+            try
+            {
+                var _sqlconn = new SqlConnection(cMain.GetConnectionString());
+                //string _commandText = "Select * from tblPosting WHERE iExpatPostingID is null";
+                string _commandText = "Select * from tblPosting where iPostingID = " + postingID.ToString();
+                var _sqlda = new SqlDataAdapter(_commandText, _sqlconn);
+                var _datatable = new DataTable();
+                _sqlda.Fill(_datatable);
+                if (_datatable.Rows.Count > 0)
+                {
+                    datarow = _datatable.Rows[0];
+                }
+
+                return datarow;
+            }
+            catch { return null; }
+        }
+
+        public static DataRow GetPostingByBothPostingAndExpatID(int postingID, int expatPostingID)
+        {
+            DataRow datarow = null;
+            try
+            {
+                var _sqlconn = new SqlConnection(cMain.GetConnectionString());
+                //string _commandText = "Select * from tblPosting WHERE iExpatPostingID is null";
+                string _commandText = string.Format ("Select * from tblPosting where iPostingID = {0} AND iExpatPostingID = {1}", postingID,expatPostingID) ;
+                var _sqlda = new SqlDataAdapter(_commandText, _sqlconn);
+                var _datatable = new DataTable();
+                _sqlda.Fill(_datatable);
+                if (_datatable.Rows.Count > 0)
+                {
+                    datarow = _datatable.Rows[0];
+                }
+
+                return datarow;
+            }
+            catch { return null; }
+        }
+
+        public static DataTable GetActivePostings()
+        {
+            DataTable _datatable = null;
+            try
+            {
+                var _sqlconn = new SqlConnection(cMain.GetConnectionString());
+                //string _commandText = "Select * from tblPosting WHERE iExpatPostingID is null";
+                string _commandText = "Select * from tblPosting where bActive is NULL" ;
+                var _sqlda = new SqlDataAdapter(_commandText, _sqlconn);
+                _datatable = new DataTable();
+                _sqlda.Fill(_datatable);                
+                return _datatable;
+            }
+            catch { return null; }
         }
     }
 }

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Configuration;
 using System.Threading.Tasks;
+using System.Text.RegularExpressions;
 
 namespace ExpatriatePostingLinksV1
 {
@@ -39,6 +40,32 @@ namespace ExpatriatePostingLinksV1
                 ConfigurationManager.AppSettings["PagePeriod"];           
 
             return int.Parse(returnValue);
+        }
+
+        public static string cfDecodeEmail(string encodedString)
+        {
+            string email = "";
+            int r = Convert.ToInt32(encodedString.Substring(0, 2), 16), n, i;
+            for (n = 2; encodedString.Length - n > 0; n += 2)
+            {
+                i = Convert.ToInt32(encodedString.Substring(n, 2), 16) ^ r;
+                char character = (char)i;
+                email += Convert.ToString(character);
+            }
+
+            return email;
+        }
+
+        public static bool isValidEmail(string inputEmail)
+        {
+            string strRegex = @"^([a-zA-Z0-9_\-\.]+)@((\[[0-9]{1,3}" +
+          @"\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([a-zA-Z0-9\-]+\" +
+          @".)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?)$";
+            Regex re = new Regex(strRegex);
+            if (re.IsMatch(inputEmail))
+                return (true);
+            else
+                return (false);
         }
     }
 }
